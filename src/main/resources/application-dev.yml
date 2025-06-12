@@ -8,6 +8,17 @@ server:
       max-file-size: 10MB
       max-request-size: 10MB
   port: 3000
+  ssl:
+    enabled: true
+    key-store: "C:\\certificate\\srv-keystore.p12"
+    key-store-password: "secret"
+    key-store-type: "PKCS12"
+    client-auth: want
+    trust-store: "C:\\certificate\\srv-truststore.p12"
+    trust-store-password: "secret"
+    trust-store-type: "PKCS12"
+    protocol: "TLS"
+    enabled-protocols: TLSv1.2, TLSv1.3
 spring:
   application:
     name: virtual-wallet
