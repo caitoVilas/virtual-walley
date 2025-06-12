@@ -1,4 +1,4 @@
-package com.vw.virtualwallet.api.models;
+package com.vw.virtualwallet.api.models.requests;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

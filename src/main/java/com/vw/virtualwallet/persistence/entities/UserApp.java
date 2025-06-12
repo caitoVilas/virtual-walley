@@ -72,4 +72,8 @@ public class UserApp implements UserDetails, Principal {
     public String getUsername() {
         return email;
     }
+
+    public String getFullName() {
+        return name + " " + surname;
+    }
 }
