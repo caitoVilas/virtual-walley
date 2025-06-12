@@ -1,0 +1,5 @@
+# GLOBAL PROFILE
+
+spring:
+  profiles:
+    active: dev
