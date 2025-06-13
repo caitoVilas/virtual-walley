@@ -17,6 +17,8 @@ import com.vw.virtualwallet.utils.logs.WriteLog;
 import com.vw.virtualwallet.utils.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -92,6 +94,85 @@ public class UserServiceImpl implements UserService {
         UserApp user = (UserApp) authentication.getPrincipal();
         return UserMapper.mapToDto(userRepository.findById(user.getId())
                 .orElseThrow(() ->new NotFoundException("user not found with id: " + user.getId())));
+    }
+
+    /**
+     * Retrieves a paginated list of users.
+     * It returns a Page of UserResponse objects.
+     *
+     * @param page the page number to retrieve
+     * @param size the number of users per page
+     * @return Page<UserResponse> containing user data
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<UserResponse> getUsers(int page, int size) {
+        log.info(WriteLog.logInfo("getUsers service"));
+        PageRequest pr = PageRequest.of(page, size);
+        return userRepository.findAll(pr).map(UserMapper::mapToDto);
+    }
+
+    /**
+     * Updates an existing user based on the provided email and UserRequest.
+     * It validates the user data and throws BadRequestException if any validation fails.
+     *
+     * @param email   the email of the user to update
+     * @param request the UserRequest containing updated user data
+     * @return UserResponse containing updated user data
+     */
+    @Override
+    @Transactional
+    public UserResponse updateUser(String email, UserRequest request, Authentication authentication) {
+        log.info(WriteLog.logInfo("updateUser service"));
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
+        var principal = (UserApp) authentication.getPrincipal();
+        //Filter A user cannot update the data of another user
+        if (!user.getId().equals(principal.getId())) {
+            throw new BadRequestException(List.of("You can only update your own user data"));
+        }
+
+        if (request.getNane() != null && !request.getNane().isEmpty()) {
+            user.setName(request.getNane());
+        }
+        if (request.getSurname() != null && !request.getSurname().isEmpty()) {
+            user.setSurname(request.getSurname());
+        }
+        if (request.getAddress() != null && !request.getAddress().isEmpty()) {
+            user.setAddress(request.getAddress());
+        }
+        if (request.getDni() != null && !request.getDni().isEmpty()) {
+            if (!userRepository.existsByDniAndIdNot(user.getDni(), user.getId())) {
+                throw new BadRequestException(List.of("DNI already exists"));
+            }
+            user.setDni(request.getDni());
+        }
+        if (request.getTelephone() != null && !request.getTelephone().isEmpty()) {
+            user.setTelephone(request.getTelephone());
+        }
+        if (request.getEmail() != null && !request.getEmail().isEmpty()) {
+            if (!userRepository.existsByEmailAndIdNot(user.getEmail(), user.getId())) {
+                throw new BadRequestException(List.of("Email already exists"));
+            }
+            if (!ValidationHelper.validateEmail(request.getEmail())) {
+                throw new BadRequestException(List.of("Invalid Email format"));
+            }
+            user.setEmail(request.getEmail());
+        }
+        return UserMapper.mapToDto(userRepository.save(user));
+    }
+
+    /**
+     * Deletes a user by their email.
+     * @param  email
+     * return void
+     */
+    @Override
+    public void deleteUser(String email) {
+        log.info(WriteLog.logInfo("deleteUser service"));
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
+        userRepository.delete(user);
     }
 
     /**
