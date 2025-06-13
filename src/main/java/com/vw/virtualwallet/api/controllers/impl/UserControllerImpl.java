@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,5 +28,10 @@ public class UserControllerImpl implements UserController {
     @Override
     public ResponseEntity<UserResponse> getUserByEmail(String email) {
         return ResponseEntity.ok(userService.getByEmail(email));
+    }
+
+    @Override
+    public ResponseEntity<UserResponse> getAuthenticatedUser(Authentication authentication) {
+        return ResponseEntity.ok(userService.getUser(authentication));
     }
 }

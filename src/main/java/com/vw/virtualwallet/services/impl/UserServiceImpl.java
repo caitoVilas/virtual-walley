@@ -6,6 +6,7 @@ import com.vw.virtualwallet.api.models.requests.UserRequest;
 import com.vw.virtualwallet.api.models.responses.UserResponse;
 import com.vw.virtualwallet.persistence.entities.Account;
 import com.vw.virtualwallet.persistence.entities.Role;
+import com.vw.virtualwallet.persistence.entities.UserApp;
 import com.vw.virtualwallet.persistence.repositories.AccountRepository;
 import com.vw.virtualwallet.persistence.repositories.RoleRepository;
 import com.vw.virtualwallet.persistence.repositories.UserRepository;
@@ -16,6 +17,7 @@ import com.vw.virtualwallet.utils.logs.WriteLog;
 import com.vw.virtualwallet.utils.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,6 +84,14 @@ public class UserServiceImpl implements UserService {
         log.info(WriteLog.logInfo("getByEmail service"));
         return UserMapper.mapToDto(userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found with email: " + email)));
+    }
+
+    @Override
+    public UserResponse getUser(Authentication authentication) {
+        log.info(WriteLog.logInfo("getUser service"));
+        UserApp user = (UserApp) authentication.getPrincipal();
+        return UserMapper.mapToDto(userRepository.findById(user.getId())
+                .orElseThrow(() ->new NotFoundException("user not found with id: " + user.getId())));
     }
 
     /**

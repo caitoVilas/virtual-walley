@@ -6,7 +6,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +33,7 @@ public interface UserController {
     public ResponseEntity<?> createUser(@RequestBody UserRequest request);
 
     @GetMapping("/email")
+    @SecurityRequirement(name = "security token")
     @Operation(summary = "Get user by email")
     @Parameter(name = "email", description = "Email of the user to retrieve")
     @ApiResponses({
@@ -39,4 +42,14 @@ public interface UserController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<UserResponse> getUserByEmail(@Parameter() String email);
+
+    @GetMapping
+    @SecurityRequirement(name = "security token")
+    @Operation(summary = "Get authenticated user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Authenticated user retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<UserResponse> getAuthenticatedUser(Authentication authentication);
 }
