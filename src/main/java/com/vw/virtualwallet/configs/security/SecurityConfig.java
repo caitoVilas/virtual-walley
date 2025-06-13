@@ -50,7 +50,10 @@ public class SecurityConfig {
                                         "/webjars/**",
                                         "/swagger-ui.html",
                                         "/v1/users/create/**").permitAll()
-                                .requestMatchers("/v1/users/email/**").hasRole("ADMIN")
+                                .requestMatchers(
+                                        "/v1/users/email/**",
+                                        "/v1/users/all",
+                                        "/v1/users/delete").hasRole("ADMIN")
                                 .anyRequest().authenticated();})
                 .sessionManagement(s -> s
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
