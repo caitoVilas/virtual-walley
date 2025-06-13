@@ -2,6 +2,7 @@ package com.vw.virtualwallet.services.contracts;
 
 import com.vw.virtualwallet.api.models.requests.UserRequest;
 import com.vw.virtualwallet.api.models.responses.UserResponse;
+import org.springframework.security.core.Authentication;
 
 /**
  * UserService interface for managing user-related operations.
@@ -13,4 +14,5 @@ import com.vw.virtualwallet.api.models.responses.UserResponse;
 public interface UserService {
     void createUser(UserRequest request);
     UserResponse getByEmail(String email);
+    UserResponse getUser(Authentication authentication);
 }
