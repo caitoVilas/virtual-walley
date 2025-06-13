@@ -5,6 +5,7 @@ import com.vw.virtualwallet.api.models.requests.UserRequest;
 import com.vw.virtualwallet.api.models.responses.UserResponse;
 import com.vw.virtualwallet.services.contracts.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class UserControllerImpl implements UserController {
     private final UserService userService;
 
     @Override
-    public ResponseEntity<?> createUser(UserRequest request) {
+    public ResponseEntity<?> createUser(UserRequest request) throws MessagingException {
         userService.createUser(request);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
@@ -54,5 +55,11 @@ public class UserControllerImpl implements UserController {
     public ResponseEntity<?> deleteUser(String email, Authentication authentication) {
         userService.deleteUser(email);
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<?> activateUserAccount(String token) throws MessagingException {
+        userService.activateAccount(token);
+        return ResponseEntity.ok().build();
     }
 }

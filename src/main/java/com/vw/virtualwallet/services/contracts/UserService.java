@@ -2,6 +2,7 @@ package com.vw.virtualwallet.services.contracts;
 
 import com.vw.virtualwallet.api.models.requests.UserRequest;
 import com.vw.virtualwallet.api.models.responses.UserResponse;
+import jakarta.mail.MessagingException;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 
@@ -13,10 +14,11 @@ import org.springframework.security.core.Authentication;
  *
  */
 public interface UserService {
-    void createUser(UserRequest request);
+    void createUser(UserRequest request) throws MessagingException;
     UserResponse getByEmail(String email);
     UserResponse getUser(Authentication authentication);
     Page<UserResponse> getUsers(int page, int size);
     UserResponse updateUser(String email, UserRequest request, Authentication authentication);
     void deleteUser(String email);
+    void activateAccount(String token) throws MessagingException;
 }

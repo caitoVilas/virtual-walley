@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.mail.MessagingException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public interface UserController {
             @ApiResponse(responseCode = "400", description = "Bad request, validation failed"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<?> createUser(@RequestBody UserRequest request);
+    public ResponseEntity<?> createUser(@RequestBody UserRequest request) throws MessagingException;
 
     @GetMapping("/email")
     @SecurityRequirement(name = "security token")
@@ -89,4 +90,14 @@ public interface UserController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<?> deleteUser(@Parameter() String email, Authentication authentication);
+
+    @GetMapping("/activate-account")
+    @Operation(summary = "Activate user account")
+    @Parameter(name = "token", description = "Activation code for the user account")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User account activated successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad request, activation code invalid or expired"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<?> activateUserAccount(@Parameter() String token) throws MessagingException;
 }
