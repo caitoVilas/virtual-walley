@@ -15,6 +15,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Security configuration class for the application.
+ * It sets up the security filter chain, authentication provider,
+ * and JWT token filter.
+ *
+ * @author caito
+ *
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -49,7 +57,8 @@ public class SecurityConfig {
                                         "/swagger-ui/**",
                                         "/webjars/**",
                                         "/swagger-ui.html",
-                                        "/v1/users/create/**").permitAll()
+                                        "/v1/users/create/**",
+                                        "/v1/users/activate-account/**").permitAll()
                                 .requestMatchers(
                                         "/v1/users/email/**",
                                         "/v1/users/all",
