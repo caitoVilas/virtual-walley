@@ -4,6 +4,7 @@ import com.vw.virtualwallet.api.exceptions.customs.BadRequestException;
 import com.vw.virtualwallet.api.exceptions.customs.NotFoundException;
 import com.vw.virtualwallet.api.models.requests.TransactionRequest;
 import com.vw.virtualwallet.api.models.requests.TransferRequest;
+import com.vw.virtualwallet.api.models.responses.TransactionResponse;
 import com.vw.virtualwallet.persistence.entities.Account;
 import com.vw.virtualwallet.persistence.entities.Transaction;
 import com.vw.virtualwallet.persistence.entities.UserApp;
@@ -12,8 +13,13 @@ import com.vw.virtualwallet.persistence.repositories.TransactionRepository;
 import com.vw.virtualwallet.services.contracts.TransactionService;
 import com.vw.virtualwallet.utils.enums.TransactionType;
 import com.vw.virtualwallet.utils.logs.WriteLog;
+import com.vw.virtualwallet.utils.mappers.TransactionMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,12 +55,11 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public void deposit(TransactionRequest request, Authentication auth) {
-        log.info(WriteLog.logInfo("deposit"));
+        log.info(WriteLog.logInfo("deposit service"));
         UserApp user = (UserApp) auth.getPrincipal();
         Account account = accountRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Account not found for user: " + user.getUsername()));
         if (request.getAmount().compareTo( BigDecimal.ZERO) <= 0) {
-            log.error(WriteLog.logError("Deposit amount must be greater than zero"));
             throw new BadRequestException(List.of("Deposit amount must be greater than zero"));
         }
         Transaction transaction = new Transaction();
@@ -81,7 +86,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public void trasnfer(TransferRequest request, Authentication auth) {
-        log.info(WriteLog.logInfo("trasnfer"));
+        log.info(WriteLog.logInfo("trasnfer service"));
         UserApp user = (UserApp) auth.getPrincipal();
         Account sourceAccount = accountRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new NotFoundException("Source account not found for user: " + user.getUsername()));
@@ -118,6 +123,26 @@ public class TransactionServiceImpl implements TransactionService {
         destinationAccount.setBalance(destinationAccount.getBalance().add(request.getAmount()));
         accountRepository.save(sourceAccount);
         accountRepository.save(destinationAccount);
+    }
+
+    /**
+     * Retrieves a paginated list of transactions for the authenticated user.
+     * The transactions are filtered by the user's account and returned in a paginated format.
+     *
+     * @param auth the authentication object containing user details
+     * @param page the page number to retrieve
+     * @param size the number of transactions per page
+     * @return a Page of TransactionResponse containing transaction details
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TransactionResponse> getTransactions(Authentication auth, int page, int size) {
+        log.info(WriteLog.logInfo("getTransactions service"));
+        UserApp user = (UserApp) auth.getPrincipal();
+        Account account = accountRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new NotFoundException("Account not found for user: " + user.getUsername()));
+        PageRequest pr = PageRequest.of(page, size, Sort.by("dateTime").descending());
+        return transactionRepository.findAllByAccount(account, pr).map(TransactionMapper::mapToDto);
     }
 
 
