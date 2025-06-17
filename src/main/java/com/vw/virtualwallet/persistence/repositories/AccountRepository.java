@@ -4,6 +4,7 @@ import com.vw.virtualwallet.persistence.entities.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository interface for managing Account entities.
@@ -13,5 +14,6 @@ import java.util.Optional;
  *
  */
 public interface AccountRepository extends JpaRepository<Account, Long> {
-    Optional<Account> findByAccountNumberOrAliasEquals(String accountNumber, String alias);
+    Optional<Account> findByAccountNumberOrAliasEqualsIgnoreCase(String accountNumber, String alias);
+    Optional<Account> findByUserId(UUID userId);
 }
